@@ -96,8 +96,12 @@ func main() {
 				Name:  "edit",
 				Usage: "edit note with given ID",
 				Action: func(cCtx *cli.Context) error {
-					// Function to list all notes
-					app.ListNotes(messageLength)
+					// Function to edit notes
+					i, err := strconv.ParseInt(cCtx.Args().Get(0), 10, 64)
+					if err != nil {
+						return fmt.Errorf("%s is not a valid ID", cCtx.Args().Get(0))
+					}
+					app.EditNote(i)
 					return nil
 				},
 			},
