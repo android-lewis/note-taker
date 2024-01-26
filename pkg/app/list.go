@@ -44,9 +44,9 @@ func formatFileInfo(info os.FileInfo, fileContent []byte, messageLimit int) *Fil
 }
 
 func ListNotes(messageLimit int) {
-	writer := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
+	writer := tabwriter.NewWriter(os.Stdout, 25, 2, 2, ' ', 0)
 	tabs := tabby.NewCustom(writer)
-	tabs.AddHeader("Last Modified", "ID", "Name", "Preview")
+	tabs.AddHeader("Created", "ID", "Name", "Preview")
 
 	err := filepath.Walk(config.DataDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
