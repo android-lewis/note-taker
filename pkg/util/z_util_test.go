@@ -10,7 +10,7 @@ import (
 const testPath = "../../testindex.json"
 
 func TestAddIndex(t *testing.T) {
-	defer clearIndex(testPath)
+	defer RemoveFile(testPath)
 	id := time.Now().UnixMicro()
 	path := "./data/test.md"
 
@@ -32,14 +32,14 @@ func TestAddIndex(t *testing.T) {
 
 }
 
-func TestSearch(t *testing.T) {
-	defer clearIndex(testPath)
+func generateRandomIndexMap(length int) ([]Index, int64) {
 	var id int64
 
 	indexMap := []Index{}
-	randomSeed := rand.Intn(1000)
+	randomSeed := rand.Intn(length)
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < length; i++ {
+		time.Sleep(time.Microsecond) //Generate articificial time difference (possible duplicates)
 		if i == randomSeed {
 			id = time.Now().UnixMicro()
 			path := "./data/test.md"
@@ -52,6 +52,13 @@ func TestSearch(t *testing.T) {
 			indexMap = append(indexMap, fakeindex)
 		}
 	}
+
+	return indexMap, id
+}
+
+func TestSearch(t *testing.T) {
+	defer RemoveFile(testPath)
+	indexMap, id := generateRandomIndexMap(1000)
 
 	writeJSON(testPath, indexMap)
 	index, _, err := SearchIndex(testPath, id)
@@ -64,31 +71,29 @@ func TestSearch(t *testing.T) {
 		t.Errorf("incorrect ID returned: %v", index)
 	}
 
-	fmt.Printf("ID: %d Index: %v\n", id, index)
+}
 
+func TestRemoveIndex(t *testing.T) {
+	indexMap, id := generateRandomIndexMap(1000)
+	_, i, err := performSearch(indexMap, id)
+	if err != nil {
+		t.Errorf("could not find id: %d", id)
+	}
+
+	indexMap = removeIndex(indexMap, i)
+
+	_, _, err = performSearch(indexMap, id)
+	if err == nil {
+		t.Errorf("found id in index map: %d", id)
+	}
+
+	fmt.Println(err)
 }
 
 func BenchmarkSearch(b *testing.B) {
 	// Start setup
-	defer clearIndex(testPath)
-	var id int64
-
-	indexMap := []Index{}
-	randomSeed := rand.Intn(1000000)
-
-	for i := 0; i < 1000000; i++ {
-		if i == randomSeed {
-			id = time.Now().UnixMicro()
-			path := "./data/test.md"
-			newindex := Index{ID: id, Path: path}
-			indexMap = append(indexMap, newindex)
-		} else {
-			fakeId := time.Now().UnixMicro()
-			fakePath := "./data/fakeTest.md"
-			fakeindex := Index{ID: fakeId, Path: fakePath}
-			indexMap = append(indexMap, fakeindex)
-		}
-	}
+	defer RemoveFile(testPath)
+	indexMap, id := generateRandomIndexMap(100000)
 
 	writeJSON(testPath, indexMap)
 	// End setup

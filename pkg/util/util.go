@@ -14,13 +14,13 @@ type Index struct {
 	Path string
 }
 
-func SearchIndex(fileName string, ID int64) (Index, int, error) {
-	indexMap := readJSON(fileName)
+func performSearch(indexMap []Index, ID int64) (Index, int, error) {
 	i, j := 0, len(indexMap)-1
 
 	for i <= j {
 		h := int(uint(i+j) >> 1)
 		if indexMap[h].ID == ID {
+			fmt.Println(ID, indexMap[h], h)
 			return indexMap[h], h, nil
 		} else if indexMap[h].ID < ID {
 			i = h + 1
@@ -30,6 +30,13 @@ func SearchIndex(fileName string, ID int64) (Index, int, error) {
 	}
 
 	return Index{ID: -1, Path: ""}, -1, fmt.Errorf("could not find index with id: %d", ID)
+}
+
+func SearchIndex(fileName string, ID int64) (Index, int, error) {
+	indexMap := readJSON(fileName)
+	index, i, err := performSearch(indexMap, ID)
+
+	return index, i, err
 }
 
 func readJSON(fileName string) []Index {
@@ -71,7 +78,7 @@ func writeJSON(fileName string, data []Index) {
 	}
 }
 
-func clearIndex(fileName string) {
+func RemoveFile(fileName string) {
 	if err := os.Remove(fileName); err != nil {
 		fmt.Printf("Failed to delete: %v", err)
 	}
@@ -93,14 +100,12 @@ func removeIndex(slice []Index, index int) []Index {
 	return append(ret, slice[index+1:]...)
 }
 
-func RemoveFromIndex(id int64) error {
-	_, i, err := SearchIndex(config.IndexPath, id)
-	if err != nil {
-		return err
-	}
+// Function to remove and update the index
+// Takes in the array index and shifts the file maintaing order
+func RemoveFromIndex(index int) error {
 
 	indexMap := readJSON(config.IndexPath)
-	altered := removeIndex(indexMap, i)
+	altered := removeIndex(indexMap, index)
 
 	writeJSON(config.IndexPath, altered)
 
