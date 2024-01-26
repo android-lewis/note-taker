@@ -11,6 +11,8 @@ import (
 	"github.com/android-lewis/note-taker/pkg/util"
 )
 
+// Cleans all special characters from the note name,
+// so we don't violate file naming convention or cause side-effects
 func cleanNoteName(name string) string {
 	name = strings.ToLower(name)
 	replacer := strings.NewReplacer(
