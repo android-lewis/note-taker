@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
 	"syscall"
 
 	"github.com/android-lewis/note-taker/pkg/app"
@@ -97,6 +98,22 @@ func main() {
 				Action: func(cCtx *cli.Context) error {
 					// Function to list all notes
 					app.ListNotes(messageLength)
+					return nil
+				},
+			},
+			{
+				Name:  "delete",
+				Usage: "delete note with given ID",
+				Action: func(cCtx *cli.Context) error {
+					// Function to list all notes
+					i, err := strconv.ParseInt(cCtx.Args().Get(0), 10, 64)
+					if err != nil {
+						return fmt.Errorf("%s is not a valid ID", cCtx.Args().Get(0))
+					}
+					err = app.DeleteNote(i)
+					if err != nil {
+						return err
+					}
 					return nil
 				},
 			},
