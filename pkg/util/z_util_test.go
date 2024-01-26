@@ -1,31 +1,28 @@
-package app
+package util
 
 import (
 	"fmt"
 	"math/rand"
 	"testing"
 	"time"
-
-	"github.com/android-lewis/note-taker/pkg/util"
 )
 
 const testPath = "../../testindex.json"
 
 func TestAddIndex(t *testing.T) {
-	defer util.ClearIndex(testPath)
+	defer clearIndex(testPath)
 	id := time.Now().UnixMicro()
 	path := "./data/test.md"
 
-	indexMap := []util.Index{}
+	indexMap := []Index{}
 
-	newindex := util.Index{ID: id, Path: path}
+	newindex := Index{ID: id, Path: path}
 	indexMap = append(indexMap, newindex)
 
-	util.WriteJSON(testPath, indexMap)
-	data := util.ReadJSON(testPath)
+	writeJSON(testPath, indexMap)
+	data := readJSON(testPath)
 
-	for i, i2 := range data {
-		fmt.Println(i)
+	for _, i2 := range data {
 		if i2.ID == id && i2.Path == path {
 			return
 		}
@@ -36,28 +33,28 @@ func TestAddIndex(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
-	defer util.ClearIndex(testPath)
+	defer clearIndex(testPath)
 	var id int64
 
-	indexMap := []util.Index{}
+	indexMap := []Index{}
 	randomSeed := rand.Intn(1000)
 
 	for i := 0; i < 1000; i++ {
 		if i == randomSeed {
 			id = time.Now().UnixMicro()
 			path := "./data/test.md"
-			newindex := util.Index{ID: id, Path: path}
+			newindex := Index{ID: id, Path: path}
 			indexMap = append(indexMap, newindex)
 		} else {
 			fakeId := time.Now().UnixMicro()
 			fakePath := "./data/fakeTest.md"
-			fakeindex := util.Index{ID: fakeId, Path: fakePath}
+			fakeindex := Index{ID: fakeId, Path: fakePath}
 			indexMap = append(indexMap, fakeindex)
 		}
 	}
 
-	util.WriteJSON(testPath, indexMap)
-	index, err := util.SearchIndex(testPath, id)
+	writeJSON(testPath, indexMap)
+	index, _, err := SearchIndex(testPath, id)
 
 	if err != nil {
 		t.Errorf("could not find index: %v", index)
@@ -73,31 +70,31 @@ func TestSearch(t *testing.T) {
 
 func BenchmarkSearch(b *testing.B) {
 	// Start setup
-	defer util.ClearIndex(testPath)
+	defer clearIndex(testPath)
 	var id int64
 
-	indexMap := []util.Index{}
+	indexMap := []Index{}
 	randomSeed := rand.Intn(1000000)
 
 	for i := 0; i < 1000000; i++ {
 		if i == randomSeed {
 			id = time.Now().UnixMicro()
 			path := "./data/test.md"
-			newindex := util.Index{ID: id, Path: path}
+			newindex := Index{ID: id, Path: path}
 			indexMap = append(indexMap, newindex)
 		} else {
 			fakeId := time.Now().UnixMicro()
 			fakePath := "./data/fakeTest.md"
-			fakeindex := util.Index{ID: fakeId, Path: fakePath}
+			fakeindex := Index{ID: fakeId, Path: fakePath}
 			indexMap = append(indexMap, fakeindex)
 		}
 	}
 
-	util.WriteJSON(testPath, indexMap)
+	writeJSON(testPath, indexMap)
 	// End setup
 
 	b.ResetTimer()
-	_, err := util.SearchIndex(testPath, id)
+	_, _, err := SearchIndex(testPath, id)
 
 	if err != nil {
 		b.Errorf("could not find index: %s", err)

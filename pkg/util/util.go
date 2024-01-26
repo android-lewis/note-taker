@@ -14,14 +14,14 @@ type Index struct {
 	Path string
 }
 
-func SearchIndex(fileName string, ID int64) (Index, error) {
-	indexMap := ReadJSON(fileName)
+func SearchIndex(fileName string, ID int64) (Index, int, error) {
+	indexMap := readJSON(fileName)
 	i, j := 0, len(indexMap)-1
 
 	for i <= j {
 		h := int(uint(i+j) >> 1)
 		if indexMap[h].ID == ID {
-			return indexMap[h], nil
+			return indexMap[h], h, nil
 		} else if indexMap[h].ID < ID {
 			i = h + 1
 		} else {
@@ -29,10 +29,10 @@ func SearchIndex(fileName string, ID int64) (Index, error) {
 		}
 	}
 
-	return Index{ID: -1, Path: ""}, fmt.Errorf("could not find index")
+	return Index{ID: -1, Path: ""}, -1, fmt.Errorf("could not find index with id: %d", ID)
 }
 
-func ReadJSON(fileName string) []Index {
+func readJSON(fileName string) []Index {
 	file, err := os.Open(fileName)
 	if err != nil {
 		fmt.Println(err)
@@ -56,7 +56,7 @@ func ReadJSON(fileName string) []Index {
 	return filteredData
 }
 
-func WriteJSON(fileName string, data []Index) {
+func writeJSON(fileName string, data []Index) {
 	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		fmt.Println(err)
@@ -71,7 +71,7 @@ func WriteJSON(fileName string, data []Index) {
 	}
 }
 
-func ClearIndex(fileName string) {
+func clearIndex(fileName string) {
 	if err := os.Remove(fileName); err != nil {
 		fmt.Printf("Failed to delete: %v", err)
 	}
@@ -79,12 +79,32 @@ func ClearIndex(fileName string) {
 
 func AddToIndex(id int64, path string) {
 	// Get the existing index list
-	indexMap := ReadJSON(config.IndexPath)
+	indexMap := readJSON(config.IndexPath)
 
 	newindex := Index{ID: id, Path: path}
 	indexMap = append(indexMap, newindex)
 
-	WriteJSON(config.IndexPath, indexMap)
+	writeJSON(config.IndexPath, indexMap)
+}
+
+func removeIndex(slice []Index, index int) []Index {
+	ret := make([]Index, 0)
+	ret = append(ret, slice[:index]...)
+	return append(ret, slice[index+1:]...)
+}
+
+func RemoveFromIndex(id int64) error {
+	_, i, err := SearchIndex(config.IndexPath, id)
+	if err != nil {
+		return err
+	}
+
+	indexMap := readJSON(config.IndexPath)
+	altered := removeIndex(indexMap, i)
+
+	writeJSON(config.IndexPath, altered)
+
+	return nil
 }
 
 func OpenEditor(filePath string, readonly bool) *exec.Cmd {
