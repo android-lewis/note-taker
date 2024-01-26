@@ -18,7 +18,7 @@ func ViewNote(id string) error {
 		return fmt.Errorf("id provided is not valid %s", err)
 	}
 
-	index, err := util.SearchIndex(config.IndexPath, intId)
+	index, _, err := util.SearchIndex(config.IndexPath, intId)
 	if err != nil {
 		return fmt.Errorf("could not find note with id: %v", index)
 	}
