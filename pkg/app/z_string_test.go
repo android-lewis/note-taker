@@ -67,6 +67,8 @@ var fileNameTests = []struct {
 }{
 	{"empty", "", "new_note"},
 	{"standard", "note 1", "note1"},
+	{"special_char", "note!/1", "note!1"},
+	{"only_special_char", "///../,?", "new_note"},
 }
 
 func TestGenerateFileName(t *testing.T) {
@@ -74,8 +76,8 @@ func TestGenerateFileName(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// Breakup returned string into key, name and extension
 			// Ensure matches returned key, name and extension
-
-			fmt.Println(test)
+			path, id := generateFileName(test.in)
+			fmt.Println(path, id)
 		})
 	}
 }
