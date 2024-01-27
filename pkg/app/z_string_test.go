@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/android-lewis/note-taker/mocks"
+	"github.com/android-lewis/note-taker/pkg/config"
 )
 
 func TestStripNewLines(t *testing.T) {
@@ -74,10 +75,14 @@ var fileNameTests = []struct {
 func TestGenerateFileName(t *testing.T) {
 	for _, test := range fileNameTests {
 		t.Run(test.name, func(t *testing.T) {
+			path, id := generateFileName(test.in)
+			truePath := fmt.Sprintf("%s/%d_%s.%s", config.DataDir, id, test.out, config.Extension)
+			truePath = truePath[2:] // Get rid of ./
 			// Breakup returned string into key, name and extension
 			// Ensure matches returned key, name and extension
-			path, id := generateFileName(test.in)
-			fmt.Println(path, id)
+			if path != truePath {
+				t.Errorf("returned filename is incorrect: %s should be: %s", path, truePath)
+			}
 		})
 	}
 }

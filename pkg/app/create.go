@@ -31,7 +31,6 @@ func generateFileName(name string) (string, int64) {
 	key := time.Now().UnixMicro()        // Uses unix microseconds time as the "key"
 	formattedName := cleanNoteName(name) // Remove any spaces and special characters from the note name
 	if formattedName == "" {
-		fmt.Println("Empty name")
 		formattedName = "new_note"
 	}
 	filename := fmt.Sprintf("%d_%s.%s", key, formattedName, config.Extension)
