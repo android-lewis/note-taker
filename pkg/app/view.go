@@ -20,7 +20,7 @@ func ViewNote(id string) error {
 
 	index, _, err := util.SearchIndex(config.IndexPath, intId)
 	if err != nil {
-		return fmt.Errorf("could not find note with id: %v", index)
+		return fmt.Errorf("could not find note with id: %v", id)
 	}
 
 	cmd := util.OpenEditor(index.Path, true)

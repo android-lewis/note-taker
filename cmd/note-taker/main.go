@@ -88,7 +88,10 @@ func main() {
 				Usage: "view note with given ID",
 				Action: func(cCtx *cli.Context) error {
 					// Function to list all notes
-					app.ViewNote(cCtx.Args().Get(0))
+					err := app.ViewNote(cCtx.Args().Get(0))
+					if err != nil {
+						return err
+					}
 					return nil
 				},
 			},
